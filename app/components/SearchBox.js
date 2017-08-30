@@ -41,21 +41,20 @@ class SearchBox extends React.Component {
     this.state = {
       results: [],
       movieId: null,
-      searchText: '',
       activeSearchResults: false,
       resultFocus: false
     };
   }
 
   searchMovie(val) {
-    console.log(val);
-    val.length > 1 &&
-    api.searchMovie(val)
-      .then(data => {
-        this.setState(() => {
-          return {results: data.results.filter((movie) => movie.vote_count > 50).slice(0,5), activeSearchResults: true};
-        });
-      });
+    val.length > 1
+    ? api.searchMovie(val)
+        .then(data => {
+          this.setState(() => {
+            return {results: data.results.filter((movie) => movie.vote_count > 50).slice(0,5), activeSearchResults: true};
+          });
+        })
+    : this.setState(() => ({activeSearchResults: false}));
   }
 
   handleSelect(id) {
@@ -66,7 +65,7 @@ class SearchBox extends React.Component {
 
   handleClose() {
     window.document.body.style.overflow = 'auto';
-    this.setState(() => ({movieId: null, activeSearchResults: false, searchText: ''}));
+    this.setState(() => ({movieId: null, activeSearchResults: false}));
   }
 
   handleResultFocus() {
@@ -86,7 +85,6 @@ class SearchBox extends React.Component {
   }
 
   render () {
-    const searchText = this.state.searchText;
     const results = this.state.results;
     const movieId = this.state.movieId;
     const activeSearchResults = this.state.activeSearchResults;
