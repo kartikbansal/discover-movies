@@ -1,8 +1,10 @@
+import _ from 'lodash';
 import React from 'react';
 import api from '../utils/api.js';
 import PropTypes from 'prop-types';
 import {getFormattedDate} from '../utils/helpers.js';
 import MoviePoster from './MoviePoster.js';
+import SearchBar from './SearchBar.js';
 
 class SearchResult extends React.Component {
   shouldComponentUpdate(nextProps) {
@@ -47,7 +49,13 @@ class SearchBox extends React.Component {
 
   handleChange(val) {
     this.setState(() => ({searchText: val}));
-    val.length > 1 && api.searchMovie(val)
+    val.length > 1 && this.searchMovie(val);
+  }
+
+  searchMovie(val) {
+    console.log(val);
+    val.length > 1 &&
+    api.searchMovie(val)
       .then(data => {
         this.setState(() => {
           return {results: data.results.filter((movie) => movie.vote_count > 50).slice(0,5), activeSearchResults: true};
@@ -73,7 +81,7 @@ class SearchBox extends React.Component {
   blurFunc() {
     this.state.resultFocus === true
     ? null
-    : this.setState(() => ({activeSearchResults: false}))
+    : this.setState(() => ({activeSearchResults: false, results:[]}))
   }
 
   componentDidMount() {
@@ -87,19 +95,14 @@ class SearchBox extends React.Component {
     const results = this.state.results;
     const movieId = this.state.movieId;
     const activeSearchResults = this.state.activeSearchResults;
+    const movieSearch = _.debounce((text) => {this.searchMovie(text)}, 300)
 
     return (
       <div className="search-box-container">
-        <div>
-          <input
-            onChange={(evt) => this.handleChange(evt.target.value)}
-            type="text"
-            value={searchText}
-            placeholder="Search By Title..."
-            onFocus={() => this.setState(() => ({activeSearchResults: true}))}
-            onBlur={() => this.blurFunc()} />
-        </div>
-        {searchText && searchText.length > 1 && activeSearchResults && <SearchResult results={results} onSelect={(id) => this.handleSelect(id)} handleResultFocus={() => this.handleResultFocus()}/>}
+        <SearchBar onSearchTextChange={movieSearch}
+          onFocus={() => this.setState(() => ({activeSearchResults: true}))}
+          onBlur={() => this.blurFunc()}/>
+        {activeSearchResults && <SearchResult results={results} onSelect={(id) => this.handleSelect(id)} handleResultFocus={() => this.handleResultFocus()}/>}
         {movieId && <MoviePoster movieId={movieId} onClose={() => this.handleClose()} />}
       </div>
     )
