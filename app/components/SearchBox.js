@@ -47,11 +47,6 @@ class SearchBox extends React.Component {
     };
   }
 
-  handleChange(val) {
-    this.setState(() => ({searchText: val}));
-    val.length > 1 && this.searchMovie(val);
-  }
-
   searchMovie(val) {
     console.log(val);
     val.length > 1 &&
